@@ -1,0 +1,39 @@
+name: Gerar instaladores
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            alvo: --win
+            nome: Finora-Windows
+          - os: macos-latest
+            alvo: --mac
+            nome: Finora-Mac
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Instalar dependências
+        run: npm install
+      - name: Gerar instalador
+        run: npx electron-builder ${{ matrix.alvo }} --publish never
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+      - name: Guardar instalador
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.nome }}
+          path: |
+            dist/*.exe
+            dist/*.dmg
+          if-no-files-found: error

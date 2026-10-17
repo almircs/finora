@@ -1,0 +1,88 @@
+{
+  "name": "finora",
+  "productName": "Finora",
+  "version": "2.1.2",
+  "description": "Finora — controle de receitas e despesas, compatível com o backup do Gastos Diários.",
+  "author": "Finora",
+  "license": "UNLICENSED",
+  "private": true,
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --publish never",
+    "dist:win": "electron-builder --win --publish never",
+    "dist:mac": "electron-builder --mac --publish never",
+    "build:html": "python3 build.py && cp desktop/app/index.html app/index.html"
+  },
+  "dependencies": {
+    "sql.js": "1.10.3"
+  },
+  "devDependencies": {
+    "electron": "33.2.1",
+    "electron-builder": "25.1.8"
+  },
+  "build": {
+    "appId": "br.finora.app",
+    "productName": "Finora",
+    "artifactName": "Finora-${version}-${os}-${arch}.${ext}",
+    "directories": {
+      "buildResources": "build",
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "app/**/*",
+      "build/icon.png",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/finora.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Finora",
+      "uninstallDisplayName": "Finora",
+      "installerLanguages": [
+        "pt_BR"
+      ],
+      "language": "1046"
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
+      "category": "public.app-category.finance",
+      "icon": "build/finora.icns",
+      "identity": null
+    },
+    "dmg": {
+      "title": "Finora"
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "Office",
+      "icon": "build/icon.png"
+    }
+  }
+}
