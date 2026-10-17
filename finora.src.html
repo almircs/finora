@@ -100,10 +100,10 @@ h1.title{margin:0;font:700 26px/1.15 var(--f-display);letter-spacing:-.02em;text
 .banner{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--accent-soft);color:var(--ink);padding:10px 14px;border-radius:var(--r);font-size:14px}
 .banner button{margin-left:auto;border:1px solid var(--accent);background:transparent;color:var(--accent);border-radius:999px;padding:4px 12px;font-size:13px;font-weight:600}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg)}
-.summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));overflow:hidden}
+.summary{display:grid;grid-template-columns:repeat(1,minmax(0,1fr));overflow:hidden}
 .summary>div{padding:14px 18px;display:flex;flex-direction:column;gap:2px;min-width:0;box-shadow:1px 0 0 var(--line),0 1px 0 var(--line)}
 .summary strong{font-size:18px;font-weight:500;white-space:nowrap}
-@container (min-width: 760px){.summary{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@container (min-width: 560px){.summary{grid-template-columns:repeat(3,minmax(0,1fr))}}
 .grid2{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
 @container (min-width: 820px){.grid2{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .toprow{display:grid;grid-template-columns:24px minmax(0,150px) minmax(0,1fr) auto;gap:12px;align-items:center;font-size:14px}
@@ -249,10 +249,24 @@ details.zero summary{cursor:pointer;color:var(--muted);font-size:14px;font-weigh
 .panel2[data-ctx="t"]{max-width:640px}
 .panel2.danger{border-color:var(--danger);background:var(--danger-soft)}
 .panel2 h3{margin:0;font-size:14px;font-weight:700;display:flex;gap:8px;align-items:center}
-.icgrid{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px}
-.icgrid button{height:34px;border-radius:8px;border:2px solid transparent;background:var(--surface);color:var(--muted);display:grid;place-items:center;padding:0}
-.icgrid button .ic{width:18px;height:18px}
-.icgrid button[aria-pressed="true"]{border-color:currentColor}
+.ichead{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.icsearch{display:flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 10px;color:var(--muted);flex:0 1 220px;min-width:0}
+.icsearch .ic{width:15px;height:15px;flex:none}
+.icsearch input{border:0;outline:0;background:transparent;font:inherit;font-size:13px;color:var(--ink);min-width:0;width:100%}
+.icbox{max-height:300px;overflow-y:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:4px 10px 10px;overscroll-behavior:contain}
+.icgroup[hidden],.icgrid button[hidden],.icnone[hidden]{display:none!important}
+.icgtitle{display:block;position:sticky;top:0;z-index:1;background:var(--surface);padding:8px 0 6px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.icgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:6px}
+.icgrid button{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 2px 6px;border-radius:10px;border:2px solid transparent;background:var(--soft);color:var(--muted);min-width:0;transition:background .12s,color .12s,transform .12s}
+.icgrid button:hover{background:var(--accent-soft);color:var(--ink)}
+.icgrid button:active{transform:scale(.96)}
+.icgrid button .ic{width:22px;height:22px}
+.icgrid button span{font-size:10.5px;line-height:1.2;max-width:100%;overflow:hidden;text-align:center;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;min-height:2.4em;padding:0 3px;overflow-wrap:anywhere}
+.icgrid button[aria-pressed="true"] span{font-weight:700}
+.icnone{padding:10px 2px;margin:0}
+.cpick{position:relative;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;border:2px dashed var(--line);color:var(--muted);cursor:pointer;overflow:hidden}
+.cpick .ic{width:14px;height:14px}
+.cpick input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;border:0;padding:0}
 .dots{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 .dots button{width:26px;height:26px;border-radius:50%;border:3px solid var(--surface);padding:0;box-shadow:0 0 0 1px var(--line)}
 .dots button[aria-pressed="true"]{box-shadow:0 0 0 2px var(--ink)}
@@ -408,6 +422,54 @@ const ICONS={
  investimento:'<path d="m3 17 6-6 4 4 8-8"/><path d="M14 7h7v7"/>',
  dinheiro:'<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01M18 12h.01"/>',
  cofre:'<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="12" cy="12" r="3.5"/><path d="M12 8.5v1M7 20v2M17 20v2"/>',
+ padaria:'<path d="M5 11a3 3 0 0 1-1-5.8C5 3 8 2 12 2s7 1 8 3.2A3 3 0 0 1 19 11v9a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1z"/><path d="M9 8v2M12 7v3M15 8v2"/>',
+ pizzaria:'<path d="M12 2 2.5 19.5c6 3 13 3 19 0z"/><path d="M5 15c4.5 1.8 9.5 1.8 14 0"/><path d="M12 9h.01M10 13h.01M14.5 12.5h.01"/>',
+ carne:'<path d="M15 3c3.3 0 6 2.7 6 6 0 4-4 6.5-7.5 6l-3.3 3.3a2 2 0 1 1-3 2.2 2 2 0 1 1-2.2-3l3.3-3.3C7.9 10.5 10.5 3 15 3z"/>',
+ fruta:'<path d="M12 7c-2-1.5-6-1.5-7.5 1.5S4 17 6.5 19.5 10.5 21 12 20c1.5 1 3 1 5.5-.5S21 11.5 19.5 8.5 14 5.5 12 7z"/><path d="M12 7c0-2 1-4 3-5"/>',
+ bebida:'<path d="M5 8h10v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/><path d="M15 11h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2"/><path d="M5 8a2.5 2.5 0 0 1 2.5-4c.6-1.2 2-2 3.5-1.5A2.5 2.5 0 0 1 15 5a2 2 0 0 1 0 3"/><path d="M8.5 12v5M11.5 12v5"/>',
+ sorvete:'<path d="m7 11 5 11 5-11"/><path d="M17 7A5 5 0 0 0 7 7a3 3 0 0 0 0 4h10a3 3 0 0 0 0-4z"/>',
+ chave:'<circle cx="7.5" cy="15.5" r="4.5"/><path d="m10.7 12.3 8.8-8.8M16 7l3 3M18.5 4.5l2 2"/>',
+ condominio:'<rect x="4" y="2" width="16" height="20" rx="1"/><path d="M9 22v-4h6v4M8 6h.01M12 6h.01M16 6h.01M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M16 14h.01"/>',
+ gas:'<path d="M12 22c4 0 7-2.7 7-7 0-4-3-6.5-4-10-2.5 1.5-3.5 4-3.5 6-1-1-1.5-2-1.5-3.5C7.5 9 5 11.5 5 15c0 4.3 3 7 7 7z"/>',
+ internet:'<path d="M2 8.8a15 15 0 0 1 20 0M5 12.9a10 10 0 0 1 14 0M8.5 16.4a5 5 0 0 1 7 0"/><path d="M12 20h.01"/>',
+ tv:'<rect x="2" y="7" width="20" height="14" rx="2"/><path d="m17 2-5 5-5-5"/>',
+ limpeza:'<path d="m19 3-7 7"/><path d="M12 10c-2-1-5 0-6 2l-3 7c4 1 9 0 12-3 1.5-1.5 1-4.5-3-6z"/><path d="m7 18 2-3M10.5 18.5l1.5-3"/>',
+ ferramenta:'<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.8-3.8a6 6 0 0 1-7.9 7.9l-6.9 6.9a2.1 2.1 0 0 1-3-3l6.9-6.9a6 6 0 0 1 7.9-7.9z"/>',
+ movel:'<path d="M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3"/><path d="M2 16a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v1.5H6V11a2 2 0 0 0-4 0z"/><path d="M4 18v2M20 18v2"/>',
+ metro:'<rect x="4" y="3" width="16" height="16" rx="2"/><path d="M4 11h16M12 3v8M8 19l-2 3M16 19l2 3M8 15h.01M16 15h.01"/>',
+ bicicleta:'<circle cx="5.5" cy="17.5" r="3.5"/><circle cx="18.5" cy="17.5" r="3.5"/><circle cx="15" cy="5" r="1"/><path d="M12 17.5V14l-3-3 4-3 2 3h2"/>',
+ local:'<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/>',
+ hospital:'<rect x="3" y="3" width="18" height="18" rx="3"/><path d="M12 7v10M7 12h10"/>',
+ dentista:'<path d="M12 5.5C10.5 4 8.5 3 6.5 3.5 3.5 4.3 3 7.5 4 10.5c.8 2.3 1 4 1.3 6.5.3 2.5 1 4 2.2 4 1.7 0 1.5-5 4.5-5s2.8 5 4.5 5c1.2 0 1.9-1.5 2.2-4 .3-2.5.5-4.2 1.3-6.5 1-3 .5-6.2-2.5-7-2-.5-4 .5-5.5 2z"/>',
+ oculos:'<circle cx="6" cy="15" r="4"/><circle cx="18" cy="15" r="4"/><path d="M10 15a2 2 0 0 1 4 0M2.5 13 5 6h2M21.5 13 19 6h-2"/>',
+ academia:'<rect x="4" y="7" width="3" height="10" rx="1"/><rect x="17" y="7" width="3" height="10" rx="1"/><path d="M7 12h10M2 10v4M22 10v4"/>',
+ beleza:'<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.1 15.9M14.5 14.5 20 20M8.1 8.1 12 12"/>',
+ banco:'<path d="M3 10h18M12 3l9 5H3z"/><path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 21h18"/>',
+ boleto:'<rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8v8M9 8v8M11.5 8v8M14 8v8M18 8v8"/>',
+ imposto:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 17l6-6M9.5 11.5h.01M14.5 16.5h.01"/>',
+ seguro:'<path d="M12 22s8-3.5 8-10V5l-8-3-8 3v7c0 6.5 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>',
+ assinatura:'<path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5M3 21v-5h5"/>',
+ pix:'<path d="m12 2.5 9.5 9.5-9.5 9.5L2.5 12z"/><path d="m8 12 4-4 4 4-4 4z"/>',
+ moedas:'<circle cx="9" cy="9" r="6"/><path d="M15.4 9.3A6 6 0 1 1 9.3 15.4"/><path d="M8 7h1.5v4"/>',
+ musica:'<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
+ jogo:'<rect x="2" y="6" width="20" height="12" rx="6"/><path d="M6 12h4M8 10v4M15 13h.01M18 11h.01"/>',
+ esporte:'<circle cx="12" cy="12" r="10"/><path d="m12 7 4.5 3.3-1.7 5.2H9.2l-1.7-5.2z"/><path d="M12 2v5M21.5 9.5l-5 .8M18 20l-3.2-4.5M6 20l3.2-4.5M2.5 9.5l5 .8"/>',
+ livro:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V2H6.5A2.5 2.5 0 0 0 4 4.5z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/>',
+ praia:'<path d="M22 12a10 10 0 0 0-20 0z"/><path d="M12 12v8a2 2 0 0 0 4 0M12 2v1"/>',
+ festa:'<path d="M12 2a6 6 0 0 0-6 6c0 4 3 7 6 7s6-3 6-7a6 6 0 0 0-6-6z"/><path d="m12 15-1 2h2zM12 17c0 2-2 2.5-2 5"/>',
+ camera:'<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3"/>',
+ roupa:'<path d="M20.4 3.5 16 2a4 4 0 0 1-8 0L3.6 3.5a2 2 0 0 0-1.3 2.2l.6 3.5a1 1 0 0 0 1 .8H6v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V10h2.1a1 1 0 0 0 1-.8l.6-3.5a2 2 0 0 0-1.3-2.2z"/>',
+ eletronico:'<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M2 20h20"/>',
+ joia:'<path d="M6 3h12l4 6-10 13L2 9z"/><path d="M2 9h20M11 3 8 9l4 13 4-13-3-6"/>',
+ familia:'<circle cx="9" cy="7" r="3.5"/><path d="M2 21c0-3.5 3-6 7-6s7 2.5 7 6"/><circle cx="17.5" cy="8.5" r="2.5"/><path d="M17 14c3 0 5 2 5 5"/>',
+ filhos:'<circle cx="12" cy="5" r="2.5"/><path d="M9 22v-6.5L7 15l1.5-5.5h7L17 15l-2 .5V22M12 16v6"/>',
+ igreja:'<path d="M12 2v4M10 4h4"/><path d="m6 10 6-4 6 4v12H6z"/><path d="M10 22v-4a2 2 0 0 1 4 0v4M3 22h18"/>',
+ coracao:'<path d="M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.8 0-3 .5-4.5 2-1.5-1.5-2.7-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7z"/>',
+ trabalho:'<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2M2 13h20"/>',
+ venda:'<path d="M3 9 4.5 3h15L21 9"/><path d="M3 9a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0"/><path d="M5 11.5V21h14v-9.5M10 21v-5h4v5"/>',
+ extra:'<path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/>',
+ reembolso:'<path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-4"/>',
+ relogio:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
  outros:'<circle cx="12" cy="12" r="9"/><path d="M8 12h.01M12 12h.01M16 12h.01"/>',
  mais:'<path d="M12 5v14M5 12h14"/>', fechar:'<path d="M18 6 6 18M6 6l12 12"/>', lapis:'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
  check:'<path d="M20 6 9 17l-5-5"/>', lixeira:'<path d="M3 6h18M8 6V4h8v2M6 6l1 15h10l1-15M10 11v6M14 11v6"/>',
@@ -423,10 +485,32 @@ const ICONS={
  baixo:'<path d="m6 9 6 6 6-6"/>'
 };
 const ic=(n,cls)=>`<svg class="ic${cls?' '+cls:''}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n]||ICONS.outros}</svg>`;
-const CAT_ICONS=['lanche','almoco','sacolao','mercado','compras','casa','luz','agua','telefone','cartao','moto','carro','combustivel','onibus','estacionamento','remedio','saude','educacao','lazer','pet','entrega','ferias','presente','pessoal','salario','investimento','dinheiro','cofre','outros'];
-const ICON_COLOR={lanche:'#C8691C',almoco:'#B5471B',sacolao:'#2B8A3E',mercado:'#2F9E44',compras:'#C2255C',casa:'#1C64C2',luz:'#A67C00',agua:'#1971C2',telefone:'#6741D9',cartao:'#862E9C',moto:'#C92A2A',carro:'#C92A2A',combustivel:'#E8590C',onibus:'#0B7285',estacionamento:'#495057',remedio:'#C2255C',saude:'#D6336C',educacao:'#3B5BDB',lazer:'#7048E8',pet:'#8C5A2B',entrega:'#5C7C2A',ferias:'#0C8599',presente:'#D9480F',pessoal:'#5F3DC4',salario:'#1D8049',investimento:'#2B8A3E',dinheiro:'#2F9E44',cofre:'#0B7285',outros:'#6C757D'};
-const COLORS=['#C8691C','#B3361F','#C2255C','#862E9C','#6741D9','#1971C2','#0B7285','#2B8A3E','#A67C00','#495057'];
+const ICON_GROUPS=[
+ ['Alimentação',[['lanche','Café / lanche'],['padaria','Padaria'],['almoco','Refeição'],['pizzaria','Pizza / delivery'],['carne','Açougue'],['fruta','Frutas'],['sacolao','Feira / sacolão'],['mercado','Mercado'],['bebida','Bebidas / bar'],['sorvete','Doces / sorvete']]],
+ ['Casa',[['casa','Casa'],['chave','Aluguel'],['condominio','Condomínio'],['luz','Luz'],['agua','Água'],['gas','Gás'],['internet','Internet'],['tv','TV / streaming'],['telefone','Telefone / celular'],['limpeza','Limpeza'],['ferramenta','Manutenção / reforma'],['movel','Móveis']]],
+ ['Transporte',[['carro','Carro'],['moto','Moto'],['combustivel','Combustível'],['onibus','Ônibus'],['metro','Metrô / trem'],['bicicleta','Bicicleta'],['estacionamento','Estacionamento'],['local','Uber / corrida'],['ferias','Viagem / avião']]],
+ ['Saúde e bem-estar',[['saude','Saúde'],['hospital','Hospital / plano de saúde'],['remedio','Remédio / farmácia'],['dentista','Dentista'],['oculos','Óculos / ótica'],['academia','Academia'],['beleza','Cabelo / beleza']]],
+ ['Contas e finanças',[['cartao','Cartão'],['banco','Banco / tarifas'],['boleto','Boleto'],['imposto','Impostos'],['seguro','Seguro'],['assinatura','Assinaturas'],['pix','Pix / transferência'],['moedas','Moedas / troco']]],
+ ['Lazer',[['lazer','Cinema'],['musica','Música'],['jogo','Jogos'],['esporte','Esporte / futebol'],['livro','Livros'],['praia','Praia / passeio'],['festa','Festa'],['camera','Fotos']]],
+ ['Compras e família',[['compras','Compras'],['roupa','Roupas'],['eletronico','Eletrônicos'],['joia','Joias / acessórios'],['presente','Presente'],['pessoal','Pessoal'],['familia','Família'],['filhos','Filhos'],['pet','Pet'],['educacao','Educação'],['igreja','Igreja / dízimo'],['coracao','Doação']]],
+ ['Receitas',[['salario','Salário'],['trabalho','Trabalho / freela'],['venda','Vendas'],['investimento','Investimento'],['cofre','Poupança'],['dinheiro','Dinheiro'],['extra','Extra / bônus'],['reembolso','Reembolso'],['relogio','Aposentadoria']]],
+ ['Outros',[['entrega','Entrega / correio'],['outros','Outros']]]
+];
+const CAT_ICONS=ICON_GROUPS.flatMap(g=>g[1].map(x=>x[0]));
+const ICON_LABEL=Object.fromEntries(ICON_GROUPS.flatMap(g=>g[1]));
+const ICON_COLOR={lanche:'#C8691C',almoco:'#B5471B',sacolao:'#2B8A3E',mercado:'#2F9E44',compras:'#C2255C',casa:'#1C64C2',luz:'#A67C00',agua:'#1971C2',telefone:'#6741D9',cartao:'#862E9C',moto:'#C92A2A',carro:'#C92A2A',combustivel:'#E8590C',onibus:'#0B7285',estacionamento:'#495057',remedio:'#C2255C',saude:'#D6336C',educacao:'#3B5BDB',lazer:'#7048E8',pet:'#8C5A2B',entrega:'#5C7C2A',ferias:'#0C8599',presente:'#D9480F',pessoal:'#5F3DC4',padaria:'#B07A2A',pizzaria:'#D9480F',carne:'#B3361F',fruta:'#5C940D',bebida:'#C88A0E',sorvete:'#D6336C',chave:'#1864AB',condominio:'#364FC7',gas:'#E8590C',internet:'#1098AD',tv:'#5F3DC4',limpeza:'#0C8599',ferramenta:'#5C677D',movel:'#8C5A2B',metro:'#1971C2',bicicleta:'#2B8A3E',local:'#212529',hospital:'#E03131',dentista:'#1098AD',oculos:'#495057',academia:'#E8590C',beleza:'#C2255C',banco:'#1864AB',boleto:'#495057',imposto:'#862E9C',seguro:'#0B7285',assinatura:'#7048E8',pix:'#0CA678',moedas:'#A67C00',musica:'#AE3EC9',jogo:'#5F3DC4',esporte:'#2B8A3E',livro:'#3B5BDB',praia:'#0C8599',festa:'#D6336C',camera:'#495057',roupa:'#C2255C',eletronico:'#364FC7',joia:'#AE3EC9',familia:'#E8590C',filhos:'#F08C00',igreja:'#5C677D',coracao:'#E03131',trabalho:'#5C4033',venda:'#0CA678',extra:'#F08C00',reembolso:'#1098AD',relogio:'#5F3DC4',salario:'#1D8049',investimento:'#2B8A3E',dinheiro:'#2F9E44',cofre:'#0B7285',outros:'#6C757D'};
+const COLORS=['#E03131','#B3361F','#E8590C','#C8691C','#F08C00','#A67C00','#5C940D','#2B8A3E','#0CA678','#0B7285','#1098AD','#1971C2','#364FC7','#5F3DC4','#862E9C','#AE3EC9','#C2255C','#8C5A2B','#495057','#212529'];
 const ICON_RULES=[
+ [/padaria|\bpao\b/,'padaria'],[/pizz|ifood|delivery/,'pizzaria'],[/acougue|carne|churrasc/,'carne'],[/cerveja|bebida|\bbar\b|adega|vinho/,'bebida'],[/sorvet|doce|bolo|chocolate/,'sorvete'],
+ [/aluguel/,'chave'],[/condom/,'condominio'],[/\bgas\b|botijao/,'gas'],[/internet|wi.?fi|fibra/,'internet'],[/netflix|spotify|streaming|\btv\b|prime|disney|globoplay|youtube/,'tv'],
+ [/limpeza|faxina|diarista/,'limpeza'],[/reforma|manutenc|conserto|encanad|pedreiro|eletricista/,'ferramenta'],[/movel|moveis|sofa|colchao/,'movel'],
+ [/uber|\b99\b|taxi|corrida/,'local'],[/metro|\btrem\b/,'metro'],[/bike|bicicleta/,'bicicleta'],
+ [/dentist|odonto/,'dentista'],[/oculos|otica/,'oculos'],[/academia|gym|pilates|crossfit/,'academia'],[/hospital|plano de saude|unimed/,'hospital'],
+ [/imposto|iptu|ipva|darf|\bir\b|receita federal/,'imposto'],[/seguro/,'seguro'],[/boleto/,'boleto'],[/assinatura|mensalidade app/,'assinatura'],[/\bpix\b|transfer|\bted\b|\bdoc\b/,'pix'],
+ [/musica|show/,'musica'],[/jogo|game|playstation|xbox|steam/,'jogo'],[/futebol|esporte|clube/,'esporte'],[/livro|livraria/,'livro'],[/praia|passeio/,'praia'],[/festa|aniver/,'festa'],
+ [/roupa|calcad|sapato|tenis/,'roupa'],[/eletron|notebook|computador|celular novo/,'eletronico'],[/joia|relogio|acessor/,'joia'],
+ [/igreja|dizimo|oferta/,'igreja'],[/doacao|caridade/,'coracao'],[/filho|crianca|bebe|fralda/,'filhos'],[/familia|mae|pai\b/,'familia'],
+ [/aposent|inss/,'relogio'],[/freela|trabalho|servico|bico/,'trabalho'],[/venda|vendi/,'venda'],[/bonus|extra|premio/,'extra'],[/reembols|estorno|devoluc/,'reembolso'],
  [/lanche|cafe|padaria|\bpao\b|salgado|doce|sorvete|biscoit/,'lanche'],[/almoc|jantar|refei|restaur|comida|aliment|marmit|pizza|ifood/,'almoco'],[/sacol|feira|hortifr|verdur|frut/,'sacolao'],
  [/mercado|supermerc|atacad|acougue/,'mercado'],[/^luz|energia|cemig|eletric/,'luz'],[/agua|copasa|sanea/,'agua'],[/honda|moto/,'moto'],
  [/gasolin|combust|posto|etanol|alcool|diesel/,'combustivel'],[/uber|99|taxi|carro|seguro auto|ipva|oficina|mecanic/,'carro'],[/passag|onibus|metro|transporte|brt/,'onibus'],
@@ -647,8 +731,7 @@ function tableB(list,title,extra){
 function summaryHTML(T,acc,label){return `<div class="card summary">
   <div><span class="lbl">Receitas</span><strong class="num pos">${fmt(T.i)}</strong></div>
   <div><span class="lbl">Despesas</span><strong class="num neg">${fmt(T.o)}</strong></div>
-  <div><span class="lbl">${label||'Saldo do período'}</span><strong class="num ${signCls(T.b)}">${fmt(T.b)}</strong></div>
-  <div><span class="lbl">Saldo acumulado</span><strong class="num">${fmt(acc)}</strong></div></div>`;}
+  <div><span class="lbl">${label||'Saldo do período'}</span><strong class="num ${signCls(T.b)}">${fmt(T.b)}</strong></div></div>`;}
 
 /* ================= Tela inicial ================= */
 function hourGreeting(){const h=new Date().getHours();return h<12?'Bom dia':h<18?'Boa tarde':'Boa noite';}
@@ -667,7 +750,7 @@ function viewHome(){
    <div class="grid2">
     <section class="card hero"><span class="lbl">Saldo do mês · ${mlabel}</span><span class="num amt ${signCls(T.b)}">${fmt(T.b)}</span>
       <span class="note">${T.n?`${T.n} lançamento${T.n>1?'s':''} neste mês`:'Nenhum lançamento neste mês ainda.'}</span>
-      <div class="kpis"><div><small>Receitas do mês</small><span class="num pos">${fmt(T.i)}</span></div><div><small>Despesas do mês</small><span class="num neg">${fmt(T.o)}</span></div><div><small>Saldo acumulado</small><span class="num ${bal<0?'neg':''}">${fmt(bal)}</span></div></div></section>
+      <div class="kpis"><div><small>Receitas do mês</small><span class="num pos">${fmt(T.i)}</span></div><div><small>Despesas do mês</small><span class="num neg">${fmt(T.o)}</span></div></div></section>
     <section class="card panel"><h3>Maiores despesas · ${mlabel}</h3>
       ${topRows.length?topRows.map(([id,v])=>{const c=catById(id);return `<div class="toprow"><span style="color:${cfg(c)};display:flex">${ic(c.icon)}</span><span class="nm">${esc(c.name)}</span><span class="track"><i style="width:${(v/max1*100).toFixed(1)}%;background:${cfg(c)}"></i></span><span class="num">${fmt(v)}</span></div>`;}).join(''):'<p class="note">Nenhuma despesa neste mês ainda.</p>'}
     </section></div>
@@ -779,11 +862,21 @@ function viewRCat(){
 const CE={f:null,t:null};const CD={f:null,t:null};
 function newCatEditor(type,name){const icon=guessIcon(name||'',type);return {id:null,type,name:name||'',icon,color:ICON_COLOR[icon]||COLORS[0]};}
 function editCatEditor(c){return {id:c.id,type:c.type,name:c.name,icon:c.icon,color:c.color};}
+function iconMatch(q,key,label,group){q=norm(q||'').trim();if(!q) return true;return norm(label+' '+key+' '+group).includes(q);}
+function iconGroupsHTML(e){const col=cfg(e),bg=cbg(e);let any=false;
+  const h=ICON_GROUPS.map(([g,items])=>{const vis=items.filter(([k,l])=>iconMatch(e.q,k,l,g));if(vis.length) any=true;
+    return `<div class="icgroup" data-g="${esc(g)}"${vis.length?'':' hidden'}><span class="icgtitle">${g}</span><div class="icgrid">${items.map(([k,l])=>`<button type="button" data-ceicon="${k}" data-k="${esc(norm(l+' '+k+' '+g))}" aria-pressed="${e.icon===k}" aria-label="${esc(l)}" title="${esc(l)}"${iconMatch(e.q,k,l,g)?'':' hidden'} style="${e.icon===k?`color:${col};background:${bg};border-color:${col}`:''}">${ic(k)}<span>${esc(l)}</span></button>`).join('')}</div></div>`;}).join('');
+  return h+`<p class="note icnone"${any?' hidden':''}>Nenhum ícone encontrado.</p>`;}
+function keepIcScroll(fn){const b=document.querySelector('.icbox');const top=b?b.scrollTop:0;const y=window.scrollY;const v=document.getElementById('view');const vy=v?v.scrollTop:0;fn();const n=document.querySelector('.icbox');if(n) n.scrollTop=top;window.scrollTo(0,y);if(v) v.scrollTop=vy;}
+function filterIcons(input){const box=input.closest('.panel2');if(!box) return;const q=norm(input.value).trim();let any=false;
+  box.querySelectorAll('.icgroup').forEach(g=>{let n=0;g.querySelectorAll('[data-ceicon]').forEach(b=>{const ok=!q||b.dataset.k.includes(q);b.hidden=!ok;if(ok)n++;});g.hidden=!n;if(n) any=true;});
+  const none=box.querySelector('.icnone');if(none) none.hidden=any;}
 function catEditorHTML(ctx){const e=CE[ctx];if(!e) return '';
   return `<div class="panel2" data-ctx="${ctx}"><h3>${e.id?'Editar categoria':`Nova categoria de ${e.type==='in'?'receita':'despesa'}`}</h3>
    <div style="display:flex;align-items:center;gap:10px">${bub(e,46)}<input class="inp" data-cename value="${esc(e.name)}" maxlength="40" placeholder="Nome, ex.: Padaria" aria-label="Nome da categoria"></div>
-   <div class="field"><span class="lbl">Ícone</span><div class="icgrid">${CAT_ICONS.map(i=>`<button type="button" data-ceicon="${i}" aria-pressed="${e.icon===i}" aria-label="${i}" style="${e.icon===i?`color:${cfg(e)}`:''}">${ic(i)}</button>`).join('')}</div></div>
-   <div class="field"><span class="lbl">Cor</span><div class="dots">${COLORS.concat(COLORS.includes(e.color)?[]:[e.color]).map(c=>`<button type="button" data-cecolor="${c}" aria-pressed="${e.color===c}" aria-label="Cor ${c}" style="background:${c}"></button>`).join('')}</div></div>
+   <div class="field"><div class="ichead"><span class="lbl">Ícone</span><label class="icsearch">${ic('busca')}<input data-ceq value="${esc(e.q||'')}" placeholder="Buscar ícone, ex.: gás" aria-label="Buscar ícone"></label></div>
+    <div class="icbox">${iconGroupsHTML(e)}</div></div>
+   <div class="field"><span class="lbl">Cor</span><div class="dots">${COLORS.concat(COLORS.includes(e.color)?[]:[e.color]).map(c=>`<button type="button" data-cecolor="${c}" aria-pressed="${e.color===c}" aria-label="Cor ${c}" style="background:${c}"></button>`).join('')}<label class="cpick" title="Escolher outra cor"><input type="color" data-cecustom value="${esc(e.color)}" aria-label="Escolher outra cor">${ic('mais')}</label></div></div>
    <div class="rowend"><button type="button" class="btn sec small" data-ceact="cancel">Cancelar</button><button type="button" class="btn small" data-ceact="save">${e.id?'Salvar alterações':(ctx==='f'?'Criar e usar':'Criar categoria')}</button></div></div>`;}
 function catDeleteHTML(ctx){const d=CD[ctx];if(!d) return '';const c=catById(d.id);let n=0;for(const t of tx.values()) if(t.cat===d.id) n++;
   const others=meta.categories.filter(x=>x.type===c.type&&x.id!==d.id).sort(byName);
@@ -870,8 +963,8 @@ lform.addEventListener('submit',e=>{e.preventDefault();
   else if(rep){const r={id:uid(),type:F.type,amount,cat,desc,acc,freq:rep,start:date,last:date};meta.rules.push(r);saveTx({id:`r_${r.id}_${date}`,type:F.type,amount,cat,desc,date,acc,rule:r.id,time:nowTime()},{quiet:true});saveMeta();runRecurring();render();toast('Lançamento salvo. Ele será criado de novo automaticamente.');}
   else{saveTx({id:uid(),type:F.type,amount,date,cat,desc,acc,time:nowTime()});toast('Lançamento salvo');}
   if(formWhere==='dlg') closeDlg();resetForm(true);});
-lform.addEventListener('input',e=>{if(e.target.id==='pkQ'){F.q=e.target.value;renderTiles();}else if(e.target.dataset.cename!==undefined&&CE.f){CE.f.name=e.target.value;}});
-lform.addEventListener('change',e=>{if(e.target.dataset.cdmove!==undefined&&CD.f) CD.f.moveTo=e.target.value;});
+lform.addEventListener('input',e=>{if(e.target.dataset.ceq!==undefined&&CE.f){CE.f.q=e.target.value;filterIcons(e.target);return;}if(e.target.dataset.cecustom!==undefined&&CE.f){CE.f.color=e.target.value;CE.f.colorTouched=true;return;}if(e.target.id==='pkQ'){F.q=e.target.value;renderTiles();}else if(e.target.dataset.cename!==undefined&&CE.f){CE.f.name=e.target.value;}});
+lform.addEventListener('change',e=>{if(e.target.dataset.cecustom!==undefined&&CE.f){CE.f.color=e.target.value;CE.f.colorTouched=true;keepIcScroll(renderTiles);return;}if(e.target.dataset.cdmove!==undefined&&CD.f) CD.f.moveTo=e.target.value;});
 lform.addEventListener('click',e=>{const b=e.target.closest('button');if(!b) return;
   if(b.closest('#fType')){setType(b.dataset.v);return;}
   if(b.id==='fClose'){closeDlg();return;}
@@ -882,8 +975,8 @@ lform.addEventListener('click',e=>{const b=e.target.closest('button');if(!b) ret
   if(b.dataset.xdel){startDelete('f',b.dataset.xdel);renderTiles();return;}
   if(b.dataset.more){F.all=true;renderTiles();return;}
   if(b.dataset.newcat){CE.f=newCatEditor(F.type,F.q);CD.f=null;renderTiles();setTimeout(()=>{const i=lform.querySelector('[data-cename]');if(i)i.focus();},20);return;}
-  if(b.dataset.ceicon){CE.f.icon=b.dataset.ceicon;if(!CE.f.colorTouched) CE.f.color=ICON_COLOR[b.dataset.ceicon]||CE.f.color;renderTiles();return;}
-  if(b.dataset.cecolor){CE.f.color=b.dataset.cecolor;CE.f.colorTouched=true;renderTiles();return;}
+  if(b.dataset.ceicon){CE.f.icon=b.dataset.ceicon;if(!CE.f.colorTouched) CE.f.color=ICON_COLOR[b.dataset.ceicon]||CE.f.color;keepIcScroll(renderTiles);return;}
+  if(b.dataset.cecolor){CE.f.color=b.dataset.cecolor;CE.f.colorTouched=true;keepIcScroll(renderTiles);return;}
   if(b.dataset.ceact==='cancel'){CE.f=null;renderTiles();return;}
   if(b.dataset.ceact==='save'){const was=CE.f.id;const id=saveCatEditor('f');if(id){if(!was){F.cat=id;F.mode='pick';}renderPicker();render();}return;}
   if(b.dataset.cdact==='cancel'){CD.f=null;renderTiles();return;}
@@ -993,8 +1086,8 @@ document.addEventListener('click',async e=>{
   if(b.dataset.catdel){startDelete('t',b.dataset.catdel);render();const p=document.querySelector('#view .panel2');if(p)p.scrollIntoView({block:'center'});return;}
   const inT=b.closest('[data-ctx="t"]');
   if(inT){
-    if(b.dataset.ceicon){CE.t.icon=b.dataset.ceicon;if(!CE.t.colorTouched) CE.t.color=ICON_COLOR[b.dataset.ceicon]||CE.t.color;render();return;}
-    if(b.dataset.cecolor){CE.t.color=b.dataset.cecolor;CE.t.colorTouched=true;render();return;}
+    if(b.dataset.ceicon){CE.t.icon=b.dataset.ceicon;if(!CE.t.colorTouched) CE.t.color=ICON_COLOR[b.dataset.ceicon]||CE.t.color;keepIcScroll(render);return;}
+    if(b.dataset.cecolor){CE.t.color=b.dataset.cecolor;CE.t.colorTouched=true;keepIcScroll(render);return;}
     if(b.dataset.ceact==='cancel'){CE.t=null;render();return;}
     if(b.dataset.ceact==='save'){if(saveCatEditor('t')){render();if(F.ready) renderPicker();}return;}
     if(b.dataset.cdact==='cancel'){CD.t=null;render();return;}
@@ -1017,8 +1110,11 @@ document.addEventListener('input',e=>{const t=e.target;if(lform.contains(t)) ret
   if(t.id==='rcQ'){liveInput('rcQ',()=>{ui.rcQ=t.value;});return;}
   if(t.id==='catsQ'){liveInput('catsQ',()=>{ui.catsQ=t.value;});return;}
   if(t.id==='customColor'){ui.custom=t.value;ui.palette='custom';rememberUI();applyPalette();return;}
+  if(t.dataset.ceq!==undefined&&CE.t){CE.t.q=t.value;filterIcons(t);return;}
+  if(t.dataset.cecustom!==undefined&&CE.t){CE.t.color=t.value;CE.t.colorTouched=true;return;}
   if(t.dataset.cename!==undefined&&CE.t) CE.t.name=t.value;});
 document.addEventListener('change',e=>{const t=e.target;if(lform.contains(t)) return;
+  if(t.dataset.cecustom!==undefined&&CE.t){CE.t.color=t.value;CE.t.colorTouched=true;keepIcScroll(render);return;}
   const num=+t.value;
   switch(t.id){
     case 'acctSel':ui.acc=t.value;rememberUI();render();return;
