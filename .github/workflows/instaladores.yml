@@ -1,39 +1,93 @@
 name: Gerar instaladores
 
+# Roda sozinho a cada envio para a branch main (quando o programa muda)
+# ou manualmente pela aba Actions. No fim, publica os instaladores na
+# página "Releases" do repositório.
 on:
   workflow_dispatch:
   push:
-    tags: ['v*']
+    branches: [main]
+    paths:
+      - 'app/**'
+      - 'main.js'
+      - 'preload.js'
+      - 'package.json'
+      - 'build/**'
+
+permissions:
+  contents: write
 
 jobs:
-  build:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: windows-latest
-            alvo: --win
-            nome: Finora-Windows
-          - os: macos-latest
-            alvo: --mac
-            nome: Finora-Mac
-    runs-on: ${{ matrix.os }}
+  windows:
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-      - name: Instalar dependências
-        run: npm install
-      - name: Gerar instalador
-        run: npx electron-builder ${{ matrix.alvo }} --publish never
+          node-version: 22
+      - run: npm install
+      - name: Gerar instalador do Windows
+        run: npx electron-builder --win --publish never
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
-      - name: Guardar instalador
-        uses: actions/upload-artifact@v4
+      - name: Dar nome amigável
+        shell: bash
+        run: |
+          mkdir saida
+          cp dist/*.exe "saida/Instalar-Finora-Windows.exe"
+      - uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.nome }}
-          path: |
-            dist/*.exe
-            dist/*.dmg
+          name: windows
+          path: saida/*
           if-no-files-found: error
+
+  mac:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Montar o app para Mac (Intel e chip Apple)
+        run: npx electron-builder --mac dir --x64 --arm64 --publish never
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+      - name: Assinar (ad-hoc) e compactar
+        run: |
+          mkdir saida
+          for d in dist/mac dist/mac-arm64; do
+            app="$d/Finora.app"
+            codesign --force --deep --sign - "$app"
+            codesign --verify --deep "$app"
+          done
+          ditto -c -k --keepParent dist/mac-arm64/Finora.app "saida/Finora-Mac-chip-Apple-M1-a-M4.zip"
+          ditto -c -k --keepParent dist/mac/Finora.app "saida/Finora-Mac-Intel.zip"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mac
+          path: saida/*
+          if-no-files-found: error
+
+  publicar:
+    needs: [windows, mac]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: arquivos
+          merge-multiple: true
+      - name: Publicar na página Releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VER=$(node -p "require('./package.json').version")
+          TAG="v$VER"
+          ls -la arquivos
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" arquivos/* --clobber
+          else
+            gh release create "$TAG" arquivos/* --target "$GITHUB_SHA" \
+              --title "Finora $VER" --notes-file .github/notas-da-versao.md
+          fi
