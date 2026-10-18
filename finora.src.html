@@ -64,6 +64,13 @@ h1.title{margin:0;font:700 26px/1.15 var(--f-display);letter-spacing:-.02em;text
 .side nav button:hover{background:var(--side-active)}
 .accts{display:flex;flex-direction:column;gap:2px}
 .accts .lbl{color:var(--side-label);padding:0 10px 6px}
+.accts .since{color:var(--side-muted);font-size:12px;padding:0 10px 6px;margin-top:-4px}
+.accts .tot{display:flex;flex-direction:column;gap:1px;padding:5px 10px;font-size:12.5px;color:var(--side-muted)}
+.accts .tot .num{color:var(--side-ink);font-size:16px;white-space:nowrap}
+.accts .tot .num.in{color:#6EE7A8}.accts .tot .num.out{color:#FF9B85}
+.accts .tot.sum{border-top:1px solid rgba(255,255,255,.14);margin-top:4px;padding-top:9px;color:var(--side-ink);font-weight:600}
+.accts .sidesel{margin:12px 6px 0;background:rgba(255,255,255,.08);color:var(--side-ink);border-color:rgba(255,255,255,.18);font-size:13px}
+.accts .sidesel option{color:#13201C}
 .accts button{display:flex;justify-content:space-between;gap:8px;border:0;background:transparent;color:var(--side-muted);padding:5px 10px;border-radius:7px;font-size:13.5px;text-align:left}
 .accts button span:first-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .accts button[aria-pressed="true"]{background:var(--side-active);color:var(--side-ink)}
@@ -789,8 +796,13 @@ function renderChrome(){
   const brand=`<div class="brand"><img class="logo" src="${LOGO}" alt=""><b>${APP}</b></div>`;
   if(lk==='a'){
     let accts='';
-    if(meta&&meta.accounts.length>1){const bal=accBalances();let tot=0;bal.forEach(v=>tot+=v);
-      accts=`<div class="accts"><span class="lbl">Contas</span><button data-acc="all" aria-pressed="${ui.acc==='all'}"><span>Todas</span><span class="num">${fmt(tot)}</span></button>${meta.accounts.map(a=>`<button data-acc="${esc(a.id)}" aria-pressed="${ui.acc===a.id}"><span>${esc(a.name)}</span><span class="num">${fmt(bal.get(a.id))}</span></button>`).join('')}</div>`;}
+    if(meta){const all=[...tx.values()].filter(accOk);const T=totals(all);let first='';for(const t of all) if(!first||t.date<first) first=t.date;
+      const since=first?(()=>{const d=fromISO(first);return `desde ${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;})():'nenhum lançamento ainda';
+      const sel=meta.accounts.length>1?`<select id="acctSel" class="sel sidesel" aria-label="Conta"><option value="all">Todas as contas</option>${meta.accounts.map(a=>`<option value="${esc(a.id)}" ${ui.acc===a.id?'selected':''}>${esc(a.name)}</option>`).join('')}</select>`:'';
+      accts=`<div class="accts"><span class="lbl">Resumo geral</span><span class="since">${since}</span>
+        <div class="tot"><span>Receitas totais</span><span class="num in">${fmt(T.i)}</span></div>
+        <div class="tot"><span>Despesas totais</span><span class="num out">${fmt(T.o)}</span></div>
+        <div class="tot sum"><span>Saldo total</span><span class="num ${T.b<0?'out':''}">${fmt(T.b)}</span></div>${sel}</div>`;}
     $('side').innerHTML=`${brand}<nav aria-label="Menu">${NAV.map(btn).join('')}<span class="lbl">Opções</span>${OPT.map(btn).join('')}</nav>${accts}`;
     $('topbar').innerHTML='';
   } else {

@@ -10,7 +10,11 @@ Na primeira vez, clique no Finora com o botão direito → **Abrir** → **Abrir
 
 Não sabe qual é o seu Mac? Menu  → **Sobre este Mac**: se aparecer "Chip Apple M…", use o primeiro; se aparecer "Processador Intel", use o segundo.
 
-## Novidades da versão 2.3
+## Novidades da versão 2.4
+- No menu lateral, "Contas" virou **Resumo geral**: receitas totais, despesas totais e saldo total de todo o período lançado
+- A escolha de conta continua disponível logo abaixo do resumo
+
+## Versão 2.3
 - Novos ícones ilustrados e coloridos (azul e laranja) para todas as categorias
 - Em Aparência → Ícones das categorias, escolha entre **Ilustrado** e **Linha**
 
