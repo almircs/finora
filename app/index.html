@@ -64,9 +64,11 @@ h1.title{margin:0;font:700 26px/1.15 var(--f-display);letter-spacing:-.02em;text
 .side nav button:hover{background:var(--side-active)}
 .accts{display:flex;flex-direction:column;gap:2px}
 .accts .lbl{color:var(--side-label);padding:0 10px 6px}
-.accts .since{color:var(--side-muted);font-size:12px;padding:0 10px 6px;margin-top:-4px}
-.accts .tot{display:flex;flex-direction:column;gap:1px;padding:5px 10px;font-size:12.5px;color:var(--side-muted)}
-.accts .tot .num{color:var(--side-ink);font-size:16px;white-space:nowrap}
+.accts{border-top:1px solid rgba(255,255,255,.16);margin-top:14px;padding-top:16px}
+.accts>.lbl{font-size:12.5px;letter-spacing:.08em}
+.accts .since{color:var(--side-muted);font-size:13px;padding:0 10px 8px;margin-top:-4px}
+.accts .tot{display:flex;flex-direction:column;gap:2px;padding:6px 10px;font-size:14px;color:var(--side-muted)}
+.accts .tot .num{color:var(--side-ink);font-size:19px;white-space:nowrap}
 .accts .tot .num.in{color:#6EE7A8}.accts .tot .num.out{color:#FF9B85}
 .accts .tot.sum{border-top:1px solid rgba(255,255,255,.14);margin-top:4px;padding-top:9px;color:var(--side-ink);font-weight:600}
 .accts .sidesel{margin:12px 6px 0;background:rgba(255,255,255,.08);color:var(--side-ink);border-color:rgba(255,255,255,.18);font-size:13px}
@@ -238,6 +240,15 @@ details.zero summary{cursor:pointer;color:var(--muted);font-size:14px;font-weigh
 /* seletor de categoria */
 .picker{display:flex;flex-direction:column;gap:8px}
 .picker .search{flex:none}
+.pkwrap{position:relative}
+.pkdrop{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:30;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 32px rgba(10,20,40,.18);max-height:290px;overflow-y:auto;padding:4px}
+.pkdrop[hidden]{display:none}
+.pkdh{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:8px 10px 4px}
+.pkopt{display:flex;align-items:center;gap:10px;width:100%;border:0;background:transparent;padding:6px 10px;border-radius:8px;text-align:left;color:var(--ink);font-size:14px}
+.pkopt:hover,.pkopt:focus{background:var(--accent-soft);outline:none}
+.pkopt.on{background:var(--accent-soft);font-weight:700}
+.pkopt .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pkopt .ct{color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums}
 .pickhead{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .pickhead button{border:0;background:none;color:var(--accent);font-weight:700;font-size:13px;display:flex;align-items:center;gap:4px;padding:2px 4px}
 .pickhead button .ic{width:15px;height:15px}
@@ -761,6 +772,10 @@ const accOf=t=>t.acc||meta.accounts[0].id;
 const accById=id=>meta.accounts.find(a=>a.id===id)||{id,name:'Conta removida',initial:0};
 const accOk=t=>ui.acc==='all'||accOf(t)===ui.acc;
 function inRange(s,e){const out=[];for(const t of tx.values()) if(t.date>=s&&t.date<=e&&accOk(t)) out.push(t);return out;}
+/* Lançamentos que só transportam o saldo de um mês para o outro (ex.: categoria "Ajuste do mês Anterior.",
+   descrição "Saldo mês anterior"). Não são receita nem despesa de verdade, por isso ficam fora do Resumo geral. */
+const CARRY_RE=/(ajuste|acerto|saldo|residuo|sobra).{0,12}m[eê]s (anterior|passado)/;
+function isCarryOver(t){const c=catById(t.cat);return CARRY_RE.test(norm(c&&c.name||''))||CARRY_RE.test(norm(t.desc||''));}
 function totals(list){let i=0,o=0;for(const t of list){if(t.type==='in')i+=t.amount;else o+=t.amount;}return {i,o,b:i-o,n:list.length};}
 function balanceUntil(e){let b=0;for(const a of meta.accounts) if(ui.acc==='all'||a.id===ui.acc) b+=a.initial||0;for(const t of tx.values()) if(t.date<=e&&accOk(t)) b+=t.type==='in'?t.amount:-t.amount;return b;}
 function accBalances(){const m=new Map(meta.accounts.map(a=>[a.id,a.initial||0]));for(const t of tx.values()){const k=accOf(t);if(m.has(k)) m.set(k,m.get(k)+(t.type==='in'?t.amount:-t.amount));}return m;}
@@ -796,13 +811,13 @@ function renderChrome(){
   const brand=`<div class="brand"><img class="logo" src="${LOGO}" alt=""><b>${APP}</b></div>`;
   if(lk==='a'){
     let accts='';
-    if(meta){const all=[...tx.values()].filter(accOk);const T=totals(all);let first='';for(const t of all) if(!first||t.date<first) first=t.date;
+    if(ui.acc!=='all'){ui.acc='all';rememberUI();}
+    if(meta){const all=[...tx.values()].filter(t=>accOk(t)&&!isCarryOver(t));const T=totals(all);let first='';for(const t of all) if(!first||t.date<first) first=t.date;
       const since=first?(()=>{const d=fromISO(first);return `desde ${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;})():'nenhum lançamento ainda';
-      const sel=meta.accounts.length>1?`<select id="acctSel" class="sel sidesel" aria-label="Conta"><option value="all">Todas as contas</option>${meta.accounts.map(a=>`<option value="${esc(a.id)}" ${ui.acc===a.id?'selected':''}>${esc(a.name)}</option>`).join('')}</select>`:'';
       accts=`<div class="accts"><span class="lbl">Resumo geral</span><span class="since">${since}</span>
         <div class="tot"><span>Receitas totais</span><span class="num in">${fmt(T.i)}</span></div>
         <div class="tot"><span>Despesas totais</span><span class="num out">${fmt(T.o)}</span></div>
-        <div class="tot sum"><span>Saldo total</span><span class="num ${T.b<0?'out':''}">${fmt(T.b)}</span></div>${sel}</div>`;}
+        <div class="tot sum"><span>Saldo total</span><span class="num ${T.b<0?'out':''}">${fmt(T.b)}</span></div></div>`;}
     $('side').innerHTML=`${brand}<nav aria-label="Menu">${NAV.map(btn).join('')}<span class="lbl">Opções</span>${OPT.map(btn).join('')}</nav>${accts}`;
     $('topbar').innerHTML='';
   } else {
@@ -1053,9 +1068,15 @@ function pickerList(){const u=usage();const q=norm(F.q);
 function renderPicker(){const box=$('picker');if(!box||!meta) return;const ed=F.mode==='edit';const nType=meta.categories.filter(c=>c.type===F.type).length;
   box.innerHTML=`<div class="pickhead"><span class="lbl">Categoria</span><button type="button" id="pkMode">${ed?ic('check')+'Concluir':ic('lapis')+'Editar'}</button></div>
     ${ed?'<p class="pickhint">Toque numa categoria para mudar nome, ícone ou cor. O × exclui.</p>':''}
-    ${nType>12?`<label class="search" style="padding:6px 12px">${ic('busca')}<input id="pkQ" type="search" placeholder="Buscar categoria" value="${esc(F.q)}" aria-label="Buscar categoria"></label>`:''}
+    ${nType>6?`<div class="pkwrap"><label class="search" style="padding:6px 12px">${ic('busca')}<input id="pkQ" type="search" placeholder="Buscar categoria" value="${esc(F.q)}" aria-label="Buscar categoria" autocomplete="off"></label><div class="pkdrop" id="pkDrop" hidden></div></div>`:''}
     <div class="tiles" id="tiles"></div><div id="pkPanel"></div>`;
   renderTiles();}
+function dropList(){const u=usage();const q=norm(F.q||'');
+  return meta.categories.filter(c=>c.type===F.type&&(u.get(c.id)||0)>0&&(!q||norm(c.name).includes(q))).sort((a,b)=>(u.get(b.id)||0)-(u.get(a.id)||0)||byName(a,b)).map(c=>[c,u.get(c.id)]);}
+function renderDrop(){const d=$('pkDrop');if(!d) return;if(F.mode==='edit'){d.hidden=true;return;}const L=dropList();
+  d.innerHTML=`<div class="pkdh">${F.q?'Categorias já usadas com':'Categorias já usadas'}${F.q?` "${esc(F.q)}"`:''}</div>`+(L.length?L.map(([c,n],i)=>`<button type="button" class="pkopt${F.cat===c.id?' on':''}" data-dpick="${esc(c.id)}">${bub(c,26)}<span class="nm">${esc(c.name)}</span><span class="ct">${n.toLocaleString('pt-BR')}×</span></button>`).join(''):`<p class="note" style="padding:8px 10px;margin:0">Nenhuma categoria usada com esse nome.</p>`);
+  d.hidden=false;}
+function pickFromDrop(id){F.cat=id;F.q='';const i=$('pkQ');if(i){i.value='';i.blur();}const d=$('pkDrop');if(d) d.hidden=true;renderTiles();}
 function renderTiles(){const {cats,more}=pickerList();const ed=F.mode==='edit';
   let h=cats.map(c=>`<div class="tilew"><button type="button" class="tile" data-pick="${esc(c.id)}" aria-pressed="${!ed&&F.cat===c.id}">${bub(c,36)}<span class="nm">${esc(c.name)}</span></button>${ed?`<button type="button" class="xdel" data-xdel="${esc(c.id)}" aria-label="Excluir ${esc(c.name)}">${ic('fechar')}</button>`:''}</div>`).join('');
   if(more) h+=`<div class="tilew"><button type="button" class="tile add" data-more="1"><span class="bub" style="width:36px;height:36px">${ic('mais')}</span><span class="nm">Mais ${more}</span></button></div>`;
@@ -1071,9 +1092,18 @@ lform.addEventListener('submit',e=>{e.preventDefault();
   else if(rep){const r={id:uid(),type:F.type,amount,cat,desc,acc,freq:rep,start:date,last:date};meta.rules.push(r);saveTx({id:`r_${r.id}_${date}`,type:F.type,amount,cat,desc,date,acc,rule:r.id,time:nowTime()},{quiet:true});saveMeta();runRecurring();render();toast('Lançamento salvo. Ele será criado de novo automaticamente.');}
   else{saveTx({id:uid(),type:F.type,amount,date,cat,desc,acc,time:nowTime()});toast('Lançamento salvo');}
   if(formWhere==='dlg') closeDlg();resetForm(true);});
-lform.addEventListener('input',e=>{if(e.target.dataset.ceq!==undefined&&CE.f){CE.f.q=e.target.value;filterIcons(e.target);return;}if(e.target.dataset.cecustom!==undefined&&CE.f){CE.f.color=e.target.value;CE.f.colorTouched=true;return;}if(e.target.id==='pkQ'){F.q=e.target.value;renderTiles();}else if(e.target.dataset.cename!==undefined&&CE.f){CE.f.name=e.target.value;}});
+lform.addEventListener('input',e=>{if(e.target.dataset.ceq!==undefined&&CE.f){CE.f.q=e.target.value;filterIcons(e.target);return;}if(e.target.dataset.cecustom!==undefined&&CE.f){CE.f.color=e.target.value;CE.f.colorTouched=true;return;}if(e.target.id==='pkQ'){F.q=e.target.value;renderTiles();renderDrop();}else if(e.target.dataset.cename!==undefined&&CE.f){CE.f.name=e.target.value;}});
 lform.addEventListener('change',e=>{if(e.target.dataset.cecustom!==undefined&&CE.f){CE.f.color=e.target.value;CE.f.colorTouched=true;keepIcScroll(renderTiles);return;}if(e.target.dataset.cdmove!==undefined&&CD.f) CD.f.moveTo=e.target.value;});
+lform.addEventListener('focusin',e=>{if(e.target.id==='pkQ') renderDrop();});
+lform.addEventListener('pointerup',e=>{if(e.target.id==='pkQ') renderDrop();});
+lform.addEventListener('focusout',e=>{if(e.target.id==='pkQ') setTimeout(()=>{const d=$('pkDrop');if(d&&!d.contains(document.activeElement)) d.hidden=true;},180);});
+lform.addEventListener('keydown',e=>{if(e.target.id!=='pkQ') return;
+  if(e.key==='Enter'){e.preventDefault();const L=dropList();if(L.length) pickFromDrop(L[0][0].id);else{const t=pickerList().cats[0];if(t) pickFromDrop(t.id);}}
+  else if(e.key==='Escape'){const d=$('pkDrop');if(d) d.hidden=true;}
+  else if(e.key==='ArrowDown'){const f=lform.querySelector('#pkDrop .pkopt');if(f){e.preventDefault();f.focus();}}});
+lform.addEventListener('mousedown',e=>{if(e.target.closest('#pkDrop')) e.preventDefault();});
 lform.addEventListener('click',e=>{const b=e.target.closest('button');if(!b) return;
+  if(b.dataset.dpick){pickFromDrop(b.dataset.dpick);return;}
   if(b.closest('#fType')){setType(b.dataset.v);return;}
   if(b.id==='fClose'){closeDlg();return;}
   if(b.id==='fCancel'){resetForm(false);return;}

@@ -10,7 +10,12 @@ Na primeira vez, clique no Finora com o botão direito → **Abrir** → **Abrir
 
 Não sabe qual é o seu Mac? Menu  → **Sobre este Mac**: se aparecer "Chip Apple M…", use o primeiro; se aparecer "Processador Intel", use o segundo.
 
-## Novidades da versão 2.4
+## Novidades da versão 2.5
+- Resumo geral não conta os lançamentos de ajuste/saldo do mês anterior
+- Resumo geral com letras maiores, separado do menu e sem a lista de contas
+- Buscar categoria: ao clicar, mostra as categorias já usadas (mais usadas primeiro) para escolher com um toque
+
+## Versão 2.4
 - No menu lateral, "Contas" virou **Resumo geral**: receitas totais, despesas totais e saldo total de todo o período lançado
 - A escolha de conta continua disponível logo abaixo do resumo
 
