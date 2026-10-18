@@ -776,13 +776,16 @@ function inRange(s,e){const out=[];for(const t of tx.values()) if(t.date>=s&&t.d
 /* Lançamentos que só transportam o saldo de um mês para o outro (ex.: categoria "Ajuste do mês Anterior.",
    descrição "Saldo mês anterior"). Não são receita nem despesa de verdade, por isso ficam fora do Resumo geral. */
 const CARRY_RE=/(ajuste|acerto|saldo|residuo|sobra).{0,12}m[eê]s (anterior|passado)/;
-function isCarryOver(t){const c=catById(t.cat);return CARRY_RE.test(norm(c&&c.name||''))||CARRY_RE.test(norm(t.desc||''));}
+function isCarryOver(t){const c=catById(t.cat);const cn=norm(c&&c.name||'').trim(),d=norm(t.desc||'').trim();
+  return CARRY_RE.test(cn)||CARRY_RE.test(d)||/^ajustes?\b/.test(cn)||/^m[eê]s (anterior|passado)/.test(d);}
+/* Ajuste de abertura do mês: receita de ajuste lançada nos primeiros dias (traz o dinheiro conferido). */
+const isOpening=t=>t.type==='in'&&isCarryOver(t)&&+t.date.slice(8,10)<=5;
 /* Resumo geral.
    Receitas e despesas totais: todo o período, sem os ajustes de mês anterior.
    Saldo atual: igual ao Gastos Diários — parte do último "ajuste do mês anterior" lançado
    (que é o dinheiro real conferido naquele mês) e soma tudo o que foi lançado depois. */
 function cashSummary(){let i=0,o=0,first='',base='';const all=[...tx.values()];
-  for(const t of all){if(isCarryOver(t)){const k=t.date.slice(0,7);if(k>base) base=k;continue;}
+  for(const t of all){if(isCarryOver(t)){if(isOpening(t)){const k=t.date.slice(0,7);if(k>base) base=k;}continue;}
     if(!first||t.date<first) first=t.date;if(t.type==='in') i+=t.amount;else o+=t.amount;}
   let saldo=0;
   if(base){for(const t of all) if(t.date.slice(0,7)>=base) saldo+=t.type==='in'?t.amount:-t.amount;}
