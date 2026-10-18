@@ -10,7 +10,10 @@ Na primeira vez, clique no Finora com o botão direito → **Abrir** → **Abrir
 
 Não sabe qual é o seu Mac? Menu  → **Sobre este Mac**: se aparecer "Chip Apple M…", use o primeiro; se aparecer "Processador Intel", use o segundo.
 
-## Novidades da versão 2.5
+## Novidades da versão 2.5.1
+- Resumo geral: **Saldo atual** calculado como no Gastos Diários — parte do último "Ajuste do mês anterior" e soma o que foi lançado depois
+
+## Versão 2.5
 - Resumo geral não conta os lançamentos de ajuste/saldo do mês anterior
 - Resumo geral com letras maiores, separado do menu e sem a lista de contas
 - Buscar categoria: ao clicar, mostra as categorias já usadas (mais usadas primeiro) para escolher com um toque

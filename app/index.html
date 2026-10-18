@@ -70,6 +70,7 @@ h1.title{margin:0;font:700 26px/1.15 var(--f-display);letter-spacing:-.02em;text
 .accts .tot{display:flex;flex-direction:column;gap:2px;padding:6px 10px;font-size:14px;color:var(--side-muted)}
 .accts .tot .num{color:var(--side-ink);font-size:19px;white-space:nowrap}
 .accts .tot .num.in{color:#6EE7A8}.accts .tot .num.out{color:#FF9B85}
+.accts .tot .hint{font-size:11.5px;color:var(--side-muted);font-weight:400}
 .accts .tot.sum{border-top:1px solid rgba(255,255,255,.14);margin-top:4px;padding-top:9px;color:var(--side-ink);font-weight:600}
 .accts .sidesel{margin:12px 6px 0;background:rgba(255,255,255,.08);color:var(--side-ink);border-color:rgba(255,255,255,.18);font-size:13px}
 .accts .sidesel option{color:#13201C}
@@ -776,6 +777,17 @@ function inRange(s,e){const out=[];for(const t of tx.values()) if(t.date>=s&&t.d
    descrição "Saldo mês anterior"). Não são receita nem despesa de verdade, por isso ficam fora do Resumo geral. */
 const CARRY_RE=/(ajuste|acerto|saldo|residuo|sobra).{0,12}m[eê]s (anterior|passado)/;
 function isCarryOver(t){const c=catById(t.cat);return CARRY_RE.test(norm(c&&c.name||''))||CARRY_RE.test(norm(t.desc||''));}
+/* Resumo geral.
+   Receitas e despesas totais: todo o período, sem os ajustes de mês anterior.
+   Saldo atual: igual ao Gastos Diários — parte do último "ajuste do mês anterior" lançado
+   (que é o dinheiro real conferido naquele mês) e soma tudo o que foi lançado depois. */
+function cashSummary(){let i=0,o=0,first='',base='';const all=[...tx.values()];
+  for(const t of all){if(isCarryOver(t)){const k=t.date.slice(0,7);if(k>base) base=k;continue;}
+    if(!first||t.date<first) first=t.date;if(t.type==='in') i+=t.amount;else o+=t.amount;}
+  let saldo=0;
+  if(base){for(const t of all) if(t.date.slice(0,7)>=base) saldo+=t.type==='in'?t.amount:-t.amount;}
+  else saldo=i-o;
+  return {i,o,saldo,first,base};}
 function totals(list){let i=0,o=0;for(const t of list){if(t.type==='in')i+=t.amount;else o+=t.amount;}return {i,o,b:i-o,n:list.length};}
 function balanceUntil(e){let b=0;for(const a of meta.accounts) if(ui.acc==='all'||a.id===ui.acc) b+=a.initial||0;for(const t of tx.values()) if(t.date<=e&&accOk(t)) b+=t.type==='in'?t.amount:-t.amount;return b;}
 function accBalances(){const m=new Map(meta.accounts.map(a=>[a.id,a.initial||0]));for(const t of tx.values()){const k=accOf(t);if(m.has(k)) m.set(k,m.get(k)+(t.type==='in'?t.amount:-t.amount));}return m;}
@@ -812,12 +824,12 @@ function renderChrome(){
   if(lk==='a'){
     let accts='';
     if(ui.acc!=='all'){ui.acc='all';rememberUI();}
-    if(meta){const all=[...tx.values()].filter(t=>accOk(t)&&!isCarryOver(t));const T=totals(all);let first='';for(const t of all) if(!first||t.date<first) first=t.date;
-      const since=first?(()=>{const d=fromISO(first);return `desde ${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;})():'nenhum lançamento ainda';
+    if(meta){const R=cashSummary();
+      const since=R.first?(()=>{const d=fromISO(R.first);return `desde ${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;})():'nenhum lançamento ainda';
       accts=`<div class="accts"><span class="lbl">Resumo geral</span><span class="since">${since}</span>
-        <div class="tot"><span>Receitas totais</span><span class="num in">${fmt(T.i)}</span></div>
-        <div class="tot"><span>Despesas totais</span><span class="num out">${fmt(T.o)}</span></div>
-        <div class="tot sum"><span>Saldo total</span><span class="num ${T.b<0?'out':''}">${fmt(T.b)}</span></div></div>`;}
+        <div class="tot"><span>Receitas totais</span><span class="num in">${fmt(R.i)}</span></div>
+        <div class="tot"><span>Despesas totais</span><span class="num out">${fmt(R.o)}</span></div>
+        <div class="tot sum"><span>Saldo atual</span><span class="num ${R.saldo<0?'out':''}">${fmt(R.saldo)}</span>${R.base?`<small class="hint">a partir do ajuste de ${cap(MES[+R.base.slice(5)-1])}/${R.base.slice(0,4)}</small>`:''}</div></div>`;}
     $('side').innerHTML=`${brand}<nav aria-label="Menu">${NAV.map(btn).join('')}<span class="lbl">Opções</span>${OPT.map(btn).join('')}</nav>${accts}`;
     $('topbar').innerHTML='';
   } else {
