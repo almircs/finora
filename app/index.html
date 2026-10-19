@@ -702,6 +702,11 @@ let meta=null,metaSaved=false,tx=new Map(),mode='demo';
 let metaRef=null,monthsCol=null;
 const D=window.finora||window.caixa||null;
 const LS_KEY='finora-v1',LS_OLD='caixa-diario-v1';
+/* Versão para iPad/navegador instalado: guarda no IndexedDB (cabe muito mais que o localStorage). */
+const PWA=!!window.FINORA_PWA;
+const IDB={db:null,open(){return this.db||(this.db=new Promise((res,rej)=>{const r=indexedDB.open('finora',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}));},
+  async get(k){const db=await this.open();return new Promise((res,rej)=>{const q=db.transaction('kv').objectStore('kv').get(k);q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error);});},
+  async set(k,v){const db=await this.open();return new Promise((res,rej)=>{const t=db.transaction('kv','readwrite');t.objectStore('kv').put(v,k);t.oncomplete=()=>res();t.onerror=()=>rej(t.error);});}};
 
 /* ================= persistência ================= */
 const chains={};
@@ -710,9 +715,11 @@ async function withRetry(fn){for(let i=0;i<6;i++){try{return await fn();}catch(e
 let lsTimer=null,dirty=false;
 function writeNow(){dirty=false;const json=JSON.stringify({app:'finora',version:3,saved:new Date().toISOString(),meta,tx:[...tx.values()]});
   if(D){let ok=false;try{ok=D.saveSync(json);}catch(e){}if(!ok) toast('Não foi possível gravar no disco. Verifique o espaço livre.');return;}
+  if(PWA){IDB.set(LS_KEY,json).catch(()=>toast('Não foi possível guardar os dados neste aparelho. Faça um backup.'));return;}
   try{localStorage.setItem(LS_KEY,json);}catch(e){toast('O navegador não tem espaço para guardar tudo. Faça um backup.');}}
 function saveLocal(){dirty=true;clearTimeout(lsTimer);lsTimer=setTimeout(writeNow,300);}
 window.addEventListener('beforeunload',()=>{if(dirty){clearTimeout(lsTimer);writeNow();}});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&dirty){clearTimeout(lsTimer);writeNow();}});
 function dbFail(e){const c=e&&e.code;toast(c==='quota_exceeded'?'Limite de armazenamento atingido.':'Não foi possível salvar agora. Tente de novo.');}
 function saveMeta(){if(mode==='db'){metaSaved=true;return serial('meta',()=>withRetry(()=>metaRef.set(clone(meta)))).catch(dbFail);}if(mode==='local') saveLocal();return Promise.resolve();}
 const pendingMonth=new Set();
@@ -1302,7 +1309,7 @@ document.addEventListener('submit',e=>{if(e.target===lform) return;e.preventDefa
 /* ================= SQLite (Gastos Diários) ================= */
 let sqlPromise=null;
 function loadSql(){if(sqlPromise) return sqlPromise;
-  const srcs=D?['../node_modules/sql.js/dist/sql-asm.js']:['https://cdn.jsdelivr.net/npm/sql.js@1.10.3/dist/sql-asm.js','https://unpkg.com/sql.js@1.10.3/dist/sql-asm.js','https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-asm.js'];
+  const srcs=D?['../node_modules/sql.js/dist/sql-asm.js']:PWA?['sql-asm.js','https://cdn.jsdelivr.net/npm/sql.js@1.10.3/dist/sql-asm.js']:['https://cdn.jsdelivr.net/npm/sql.js@1.10.3/dist/sql-asm.js','https://unpkg.com/sql.js@1.10.3/dist/sql-asm.js','https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-asm.js'];
   sqlPromise=(async()=>{for(const src of srcs){if(typeof window.initSqlJs!=='function') await new Promise(res=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=res;document.head.appendChild(s);});if(typeof window.initSqlJs==='function') return window.initSqlJs();}throw new Error('sql.js indisponível');})();
   sqlPromise.catch(()=>{sqlPromise=null;});return sqlPromise;}
 const GD_SCHEMA=`CREATE TABLE android_metadata (locale TEXT);
@@ -1440,7 +1447,8 @@ function toast(msg){const t=$('toast');t.textContent=msg;t.hidden=false;clearTim
 function loadDemo(){const d=demoData();meta=d.meta;tx=new Map(d.tx.map(t=>[t.id,t]));}
 function applySaved(saved){meta=normalizeMeta(saved.meta);tx=new Map((saved.tx||[]).map(t=>[t.id,t]));}
 function begin(){runRecurring();focusLatest();render();resetForm(false);}
-function startLocal(){mode='local';let saved=null;try{saved=JSON.parse(localStorage.getItem(LS_KEY)||localStorage.getItem(LS_OLD)||'null');}catch(e){}
+async function startLocal(){mode='local';let saved=null;try{const raw=PWA?await IDB.get(LS_KEY):null;saved=JSON.parse(raw||localStorage.getItem(LS_KEY)||localStorage.getItem(LS_OLD)||'null');}catch(e){}
+  if(PWA&&navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(()=>{});
   if(saved&&saved.meta) applySaved(saved); else{loadDemo();saveLocal();}begin();}
 window.__finora={get meta(){return meta;},get tx(){return tx;},get ui(){return ui;},render,setLook,go};
 render();
