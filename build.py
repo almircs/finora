@@ -30,6 +30,7 @@ import shutil, json
 from PIL import Image
 pwa = root / 'pwa'; pwa.mkdir(exist_ok=True)
 head_extra = (
+  '<meta http-equiv="Content-Security-Policy" content="default-src \'self\'; script-src \'self\' \'unsafe-inline\' https://cdn.jsdelivr.net; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' data: https://fonts.gstatic.com; img-src \'self\' data: blob:; connect-src \'self\'; worker-src \'self\'; manifest-src \'self\'; form-action \'none\'; base-uri \'self\'">\n'
   '<link rel="manifest" href="manifest.webmanifest">\n'
   '<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">\n'
   '<meta name="apple-mobile-web-app-capable" content="yes">\n'
