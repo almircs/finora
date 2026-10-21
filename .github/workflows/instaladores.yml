@@ -1,8 +1,9 @@
 name: Gerar instaladores
 
 # Roda sozinho a cada envio para a branch main (quando o programa muda)
-# ou manualmente pela aba Actions. No fim, publica os instaladores na
-# página "Releases" do repositório.
+# ou manualmente pela aba Actions. Cada instalador vai direto para a
+# página "Releases" do repositório — sem guardar artefatos no Actions,
+# para não consumir o armazenamento (que é limitado no plano gratuito).
 on:
   workflow_dispatch:
   push:
@@ -17,8 +18,30 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: instaladores
+  cancel-in-progress: true
+
 jobs:
+  preparar:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.v.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: v
+        name: Criar a versão na página Releases (se ainda não existir)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VER=$(node -p "require('./package.json').version")
+          TAG="v$VER"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          gh release view "$TAG" >/dev/null 2>&1 || \
+            gh release create "$TAG" --target "$GITHUB_SHA" --title "Finora $VER" --notes-file .github/notas-da-versao.md
+
   windows:
+    needs: preparar
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -30,20 +53,16 @@ jobs:
         run: npx electron-builder --win --publish never
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
-      - name: Dar nome amigável
+      - name: Enviar para a página Releases
         shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          mkdir saida
-          cp dist/*.exe "saida/Instalar-Finora-Windows.exe"
-      - uses: actions/upload-artifact@v4
-        with:
-          name: windows
-          path: saida/*
-          if-no-files-found: error
-          # Só serve para passar os arquivos à etapa 'publicar'; o que fica é o Release
-          retention-days: 1
+          cp dist/*.exe "Instalar-Finora-Windows.exe"
+          gh release upload "${{ needs.preparar.outputs.tag }}" "Instalar-Finora-Windows.exe" --clobber
 
   mac:
+    needs: preparar
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
@@ -55,43 +74,14 @@ jobs:
         run: npx electron-builder --mac dir --x64 --arm64 --publish never
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
-      - name: Assinar (ad-hoc) e compactar
-        run: |
-          mkdir saida
-          for d in dist/mac dist/mac-arm64; do
-            app="$d/Finora.app"
-            codesign --force --deep --sign - "$app"
-            codesign --verify --deep "$app"
-          done
-          ditto -c -k --keepParent dist/mac-arm64/Finora.app "saida/Finora-Mac-chip-Apple-M1-a-M4.zip"
-          ditto -c -k --keepParent dist/mac/Finora.app "saida/Finora-Mac-Intel.zip"
-      - uses: actions/upload-artifact@v4
-        with:
-          name: mac
-          path: saida/*
-          if-no-files-found: error
-          # Só serve para passar os arquivos à etapa 'publicar'; o que fica é o Release
-          retention-days: 1
-
-  publicar:
-    needs: [windows, mac]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          path: arquivos
-          merge-multiple: true
-      - name: Publicar na página Releases
+      - name: Assinar (ad-hoc), compactar e enviar para a página Releases
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          VER=$(node -p "require('./package.json').version")
-          TAG="v$VER"
-          ls -la arquivos
-          if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release upload "$TAG" arquivos/* --clobber
-          else
-            gh release create "$TAG" arquivos/* --target "$GITHUB_SHA" \
-              --title "Finora $VER" --notes-file .github/notas-da-versao.md
-          fi
+          for d in dist/mac dist/mac-arm64; do
+            codesign --force --deep --sign - "$d/Finora.app"
+            codesign --verify --deep "$d/Finora.app"
+          done
+          ditto -c -k --keepParent dist/mac-arm64/Finora.app "Finora-Mac-chip-Apple-M1-a-M4.zip"
+          ditto -c -k --keepParent dist/mac/Finora.app "Finora-Mac-Intel.zip"
+          gh release upload "${{ needs.preparar.outputs.tag }}" Finora-Mac-chip-Apple-M1-a-M4.zip Finora-Mac-Intel.zip --clobber
