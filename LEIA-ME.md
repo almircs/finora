@@ -21,3 +21,9 @@ npm run dist:win   # instalador Windows (rodar no Windows)
 npm run dist:mac   # instaladores Mac (rodar no Mac)
 ```
 Ou envie esta pasta para um repositório no GitHub e rode a ação **Gerar instaladores** na aba Actions.
+
+## Direitos autorais
+
+© 2026 Carlos Almir. Todos os direitos reservados.
+
+O código está publicado para consulta. Não é permitido copiar, modificar, redistribuir ou usar comercialmente sem autorização.
